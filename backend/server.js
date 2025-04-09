@@ -5,14 +5,26 @@ const cors = require("cors");
 const fileRoutes = require("./routes/fileRoutes");
 
 const app = express();
-app.use(express.json());
+
+// ✅ Enable CORS
 app.use(cors());
 
-mongoose
-  .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+// ✅ Only use JSON body parser AFTER file routes (Multer needs raw stream for file uploads)
+app.use("/api/files", fileRoutes); // 👈 File upload routes FIRST
+
+app.use(express.json()); // 👈 Use JSON parsing after file upload middleware
+
+// ✅ MongoDB Connection
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log("DB Connection Error:", err));
+  .catch((err) => console.error("DB Connection Error:", err));
 
-app.use("/api/files", fileRoutes);
+// ✅ Error handling middleware
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err.stack);
+  res.status(500).json({ error: "Something went wrong!" });
+});
 
-app.listen(process.env.PORT, () => console.log(`Server running on port ${process.env.PORT}`));
+// ✅ Start the server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
