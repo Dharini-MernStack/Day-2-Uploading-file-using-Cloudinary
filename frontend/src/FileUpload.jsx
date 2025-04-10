@@ -5,10 +5,17 @@ const FileUpload = () => {
   const [file, setFile] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+    setError("");
+    setImageUrl("");
+  };
 
   const handleUpload = async () => {
     if (!file) {
-      setError("Please select a file.");
+      setError("Please select a file first.");
       return;
     }
 
@@ -16,20 +23,38 @@ const FileUpload = () => {
     formData.append("file", file);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/files/upload", formData);
-      setImageUrl(res.data.url);
+      setLoading(true);
       setError("");
-    } catch (error) {
-      setError("Upload failed. Try again.");
+
+      const res = await axios.post("http://localhost:5000/api/files/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setImageUrl(res.data.url);
+    } catch (err) {
+      setError("Upload failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div>
-      <input type="file" onChange={(e) => setFile(e.target.files[0])} />
-      <button onClick={handleUpload}>Upload</button>
+    <div style={{ marginTop: "2rem" }}>
+      <input type="file" onChange={handleFileChange} />
+      <button onClick={handleUpload} disabled={loading}>
+        {loading ? "Uploading..." : "Upload"}
+      </button>
+
       {error && <p style={{ color: "red" }}>{error}</p>}
-      {imageUrl && <img src={imageUrl} alt="Uploaded file" />}
+
+      {imageUrl && (
+        <div style={{ marginTop: "1rem" }}>
+          <p>Uploaded Image:</p>
+          <img src={imageUrl} alt="Uploaded" width="300" />
+        </div>
+      )}
     </div>
   );
 };
