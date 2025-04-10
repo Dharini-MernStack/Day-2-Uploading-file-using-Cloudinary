@@ -66,9 +66,6 @@
 - Connect to MongoDB in backend/index.js.
 - Create a model (Upload.js) to store file URLs in the database.
 
-- Where to Fix?
-- Update backend/server.js to connect to MongoDB.
-- Create backend/models/Upload.js to define a schema for storing uploaded files.
 
 ### **📌 Next Steps**  
 1. **Fix these issues** in the project.  
